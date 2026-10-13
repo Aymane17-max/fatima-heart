@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>إلى فطيمة ❤ | القلب المتوهج</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Reem+Kufi:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #020408;
+            color: #f1f5f9;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .title-font {
+            font-family: 'Reem Kufi', sans-serif;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .glass-card {
+            background: rgba(6, 11, 25, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            box-shadow: 0 10px 30px -10px rgba(0, 183, 255, 0.3);
+        }
+        .text-glow {
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+        }
+        .heart-pulse {
+            animation: heartPulse 1.8s ease-in-out infinite;
+        }
+        @keyframes heartPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body class="relative w-screen h-screen bg-[#020408] overflow-hidden">
+
+    <!-- Interactive Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Overlay UI Content -->
+    <div class="relative z-10 w-full h-full flex flex-col justify-between items-center p-4 sm:p-6 pointer-events-none">
+        
+        <!-- Header Badge -->
+        <div class="pt-2 sm:pt-4 pointer-events-auto">
+            <div class="glass-card px-4 py-2 rounded-full flex items-center gap-2.5 shadow-lg">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+                </span>
+                <span class="text-xs sm:text-sm font-bold text-cyan-200 tracking-wide">ينبض بحبك يا فطيمة</span>
+            </div>
+        </div>
+
+        <!-- Romantic Message Card -->
+        <div class="pb-4 sm:pb-8 w-full max-w-lg pointer-events-auto">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 text-center transition-all duration-500">
+                
+                <div class="flex justify-center mb-3">
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-inner">
+                        <i data-lucide="heart" class="w-7 h-7 fill-cyan-400/30 text-cyan-400 heart-pulse"></i>
+                    </div>
+                </div>
+
+                <h1 class="title-font text-2xl sm:text-3xl font-bold text-white mb-3 text-glow">
+                    إلى حبيبتي الغالية.. <span class="text-cyan-300">فطيمة</span>
+                </h1>
+
+                <p class="text-sm sm:text-base leading-relaxed text-slate-200 font-medium mb-4">
+                    كل جزيء متوهج هنا يمثل نبضة حب صادقة تشتعل في قلبي لأجلكِ.. 
+                    وجودكِ في حياتي ينير أيامي كجمال هذا الضياء الأزرق، دمتِ لي أملي وأجمل أقداري.
+                </p>
+
+                <div class="pt-3 border-t border-cyan-500/20 flex justify-between items-center text-xs text-cyan-300/80">
+                    <span class="flex items-center gap-1.5">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i>
+                        <span>انقر على الشاشة لإطلاق الشرر</span>
+                    </span>
+                    <span class="font-bold text-cyan-400">للأبد ❤</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Create pre-rendered sprites for glowing particles instead of computing shadowBlur every frame
+        function createGlowSprite(color, radius) {
+            const spriteCanvas = document.createElement('canvas');
+            const spriteSize = radius * 6;
+            spriteCanvas.width = spriteSize;
+            spriteCanvas.height = spriteSize;
+            const sCtx = spriteCanvas.getContext('2d');
+
+            const grad = sCtx.createRadialGradient(
+                spriteSize / 2, spriteSize / 2, 0,
+                spriteSize / 2, spriteSize / 2, spriteSize / 2
+            );
+            grad.addColorStop(0, color);
+            grad.addColorStop(0.3, color);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+            sCtx.fillStyle = grad;
+            sCtx.fillRect(0, 0, spriteSize, spriteSize);
+            return { canvas: spriteCanvas, size: spriteSize };
+        }
+
+        const sprites = [
+            createGlowSprite('rgba(56, 189, 248, 1)', 2),
+            createGlowSprite('rgba(0, 240, 255, 1)', 2.5),
+            createGlowSprite('rgba(96, 165, 250, 1)', 2),
+            createGlowSprite('rgba(255, 255, 255, 1)', 1.5)
+        ];
+
+        const heartPoints = [];
+        const numHeartPoints = 500; // Optimized count for extreme smoothness
+        for (let i = 0; i < numHeartPoints; i++) {
+            const t = (i / numHeartPoints) * Math.PI * 2;
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+            heartPoints.push({ x, y });
+        }
+
+        class Particle {
+            constructor() {
+                const target = heartPoints[Math.floor(Math.random() * heartPoints.length)];
+                this.baseTargetX = target.x;
+                this.baseTargetY = target.y;
+
+                this.angle = Math.random() * Math.PI * 2;
+                this.orbitSpeed = (Math.random() - 0.5) * 0.05;
+                this.orbitRadius = Math.random() * 12 + 4;
+
+                this.x = width / 2;
+                this.y = height / 2;
+
+                this.spriteObj = sprites[Math.floor(Math.random() * sprites.length)];
+            }
+
+            update(pulse, centerX, centerY, scale) {
+                this.angle += this.orbitSpeed;
+                const ox = Math.cos(this.angle) * this.orbitRadius;
+                const oy = Math.sin(this.angle) * this.orbitRadius;
+
+                const targetX = centerX + (this.baseTargetX * scale + ox) * pulse;
+                const targetY = centerY + (this.baseTargetY * scale + oy) * pulse;
+
+                // Simple linear interpolation
+                this.x += (targetX - this.x) * 0.08;
+                this.y += (targetY - this.y) * 0.08;
+            }
+
+            draw() {
+                const half = this.spriteObj.size / 2;
+                ctx.drawImage(this.spriteObj.canvas, this.x - half, this.y - half);
+            }
+        }
+
+        class BurstParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 2;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.04 + 0.02;
+                this.spriteObj = sprites[0];
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+
+            draw() {
+                if (this.life <= 0) return;
+                const half = this.spriteObj.size / 2;
+                ctx.globalAlpha = this.life;
+                ctx.drawImage(this.spriteObj.canvas, this.x - half, this.y - half);
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        const particles = [];
+        const burstParticles = [];
+        const totalParticles = 450; // Balanced count for perfect visual density and 60FPS speed
+
+        for (let i = 0; i < totalParticles; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate(time) {
+            // High efficiency dark clear frame
+            ctx.fillStyle = '#020408';
+            ctx.fillRect(0, 0, width, height);
+
+            const pulse = Math.sin(time * 0.003) * 0.05 + 1.0;
+            const centerX = width / 2;
+            const centerY = height < 700 ? height * 0.35 : height * 0.38;
+            const scale = Math.min(width, height) / 40;
+
+            ctx.globalCompositeOperation = 'lighter';
+
+            // Draw Heart Particles
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update(pulse, centerX, centerY, scale);
+                particles[i].draw();
+            }
+
+            // Draw Interactive Bursts
+            for (let i = burstParticles.length - 1; i >= 0; i--) {
+                burstParticles[i].update();
+                burstParticles[i].draw();
+                if (burstParticles[i].life <= 0) {
+                    burstParticles.splice(i, 1);
+                }
+            }
+
+            ctx.globalCompositeOperation = 'source-over';
+
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('click', (e) => {
+            if (e.target.closest('.glass-card')) return;
+            for (let i = 0; i < 20; i++) {
+                burstParticles.push(new BurstParticle(e.clientX, e.clientY));
+            }
+        });
+
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0 && !e.target.closest('.glass-card')) {
+                const touch = e.touches[0];
+                for (let i = 0; i < 20; i++) {
+                    burstParticles.push(new BurstParticle(touch.clientX, touch.clientY));
+                }
+            }
+        }, { passive: true });
+
+        window.onload = function() {
+            requestAnimationFrame(animate);
+        };
+    </script>
+</body>
+</html>
